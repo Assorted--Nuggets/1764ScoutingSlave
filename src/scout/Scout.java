@@ -5,9 +5,14 @@
  */
 package scout;
 
+import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileNotFoundException;
+import java.io.FileReader;
+import java.io.IOException;
+import java.io.ObjectOutputStream;
 import java.io.PrintWriter;
+import java.net.Socket;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import javafx.application.Application;
@@ -67,6 +72,9 @@ public class Scout extends Application
     public static Slider stacking, security, durability, teamwork, overallScore;
     public static Button exportBtn;
     
+    public static Socket connection;
+    public static ObjectOutputStream output;
+    
     @Override
     public void start(Stage primaryStage)
     { 
@@ -85,7 +93,29 @@ public class Scout extends Application
             @Override
             public void handle(ActionEvent event)
             {
+                try
+                {
+                    connection = new Socket("127.0.0.1", 3434);
+                } catch (IOException ex)
+                {
+                    Logger.getLogger(Scout.class.getName()).log(Level.SEVERE, null, ex);
+                }
+                
+                try
+                {
+                    output=new ObjectOutputStream(connection.getOutputStream());
+                } catch (IOException ex)
+                {
+                    Logger.getLogger(Scout.class.getName()).log(Level.SEVERE, null, ex);
+                }
                 export();
+                try
+                {
+                    connection.close();
+                } catch (IOException ex)
+                {
+                    Logger.getLogger(Scout.class.getName()).log(Level.SEVERE, null, ex);
+                }
             }
         });
         mainGrid.add(exportBtn, 0, 6);
@@ -346,12 +376,26 @@ public class Scout extends Application
             writer.println("stacking:"+stacking.getValue());
             writer.println("security:"+security.getValue());
             writer.println("durability:"+durability.getValue());
+            writer.println("end");
             
             System.out.println("Exported");
             
             writer.close();
+            
+            BufferedReader reader = new BufferedReader(new FileReader(teamNumTxt.getCharacters().toString()+roundNumber.getCharacters().toString()+".sdb"));
+            
+            String str;
+            
+            while((str = reader.readLine()) != null)
+            {
+                output.writeObject(str);
+            }
+            reader.close();
         } 
         catch (FileNotFoundException ex)
+        {
+            Logger.getLogger(Scout.class.getName()).log(Level.SEVERE, null, ex);
+        } catch (IOException ex)
         {
             Logger.getLogger(Scout.class.getName()).log(Level.SEVERE, null, ex);
         }

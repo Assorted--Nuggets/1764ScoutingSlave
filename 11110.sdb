@@ -1,0 +1,17 @@
+teamnum:111
+roundnum:10
+mobile:0
+noshow:1
+totesauto:10
+binsauto:10
+noodauto:10
+ismoving:1
+teletotes:10
+telebins:10
+telenood:10
+lifttote:1
+liftbin:1
+liftnood:1
+stacking:1.0
+security:1.0
+durability:1.0
